@@ -1,0 +1,20 @@
+{
+    "song_name": "Space Massacre",
+    "song_artist": "Enlort",
+    "song_path": "song_library/Space Massacre.csz/best_beat_ever (1).mp3",
+    "song_bpm": 180,
+    "notes": [
+        {"x": "lane1", "color": "red", "timestamp": 1590},
+        {"x": "lane2", "color": "yellow", "timestamp": 1801},
+        {"x": "lane3", "color": "red", "timestamp": 2014},
+        {"x": "lane4", "color": "yellow", "timestamp": 2178},
+        {"x": "lane1", "color": "red", "timestamp": 2405},
+        {"x": "lane2", "color": "yellow", "timestamp": 2617},
+        {"x": "lane3", "color": "red", "timestamp": 2841},
+        {"x": "lane4", "color": "blue", "timestamp": 8000},
+        {"x": "lane1", "color": "green", "timestamp": 9000},
+        {"x": "lane2", "color": "green", "timestamp": 10000},
+        {"x": "lane3", "color": "yellow", "timestamp": 11000},
+        {"x": "lane4", "color": "yellow", "timestamp": 12000}
+    ]
+}

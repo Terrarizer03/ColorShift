@@ -1,0 +1,20 @@
+{
+    "song_name": "Tutorial",
+    "song_artist": "Terrarizer",
+    "song_bpm": 120,
+    "song_path": "song_library/tutorial.csz/eazybeat 2.mp3",
+    "notes": [
+        {"x": "lane1", "color": "red", "timestamp": 949},
+        {"x": "lane4", "color": "yellow", "timestamp": 1451},
+        {"x": "lane1", "color": "red", "timestamp": 2076},
+        {"x": "lane4", "color": "yellow", "timestamp": 2740},
+        {"x": "lane1", "color": "red", "timestamp": 3404},
+        {"x": "lane2", "color": "red", "timestamp": 3000},
+        {"x": "lane3", "color": "blue", "timestamp": 3500},
+        {"x": "lane4", "color": "blue", "timestamp": 4000},
+        {"x": "lane1", "color": "green", "timestamp": 4500},
+        {"x": "lane2", "color": "green", "timestamp": 5000},
+        {"x": "lane3", "color": "yellow", "timestamp": 5500},
+        {"x": "lane4", "color": "yellow", "timestamp": 6000}
+    ]
+}

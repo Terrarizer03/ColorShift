@@ -1,4 +1,4 @@
-# WARNING: If you are viewing this code as an outsider and not a developer, this code is held up by sticks, glue, and my will to live (which is very little), and is very confusing.
+# WARNING: If you are viewing this code as an outsider and not a developer, this code is held up by sticks, glue, and my will to live which is very little, and is very confusing.
 # If you don't know what you're doing, don't touch anything. If you do, still don't touch anything. This game will, most probably, break. You have been warned.
 
 import pygame as py
@@ -20,31 +20,26 @@ py.display.set_caption("ColorShift")
 clock = py.time.Clock()
 running = True
 
-def get_resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller"""
+def get_resource_path(relative_path: str) -> str:
     try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        # PyInstaller bundle
         base_path = sys._MEIPASS
     except Exception:
-        # Get the script directory: E:\Coding Projects\Rhythm Game\code\v2
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        # Go up 2 levels to get to Rhythm Game root: E:\Coding Projects\Rhythm Game
-        base_path = os.path.dirname(os.path.dirname(script_dir))
-    
-    # Join the paths and normalize
-    full_path = os.path.normpath(os.path.join(base_path, relative_path))
-    return full_path
+        # Go up from code/v2/ → code/ → ColorShift/
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-print("Icon path:", get_resource_path("../../assets/textures/icon.png"))
-print("Song path:", get_resource_path("../../song_library/Space Massacre.csz/song.json"))
+    return os.path.normpath(os.path.join(base_path, relative_path))
 
-icon_path = get_resource_path("../../assets/textures/icon.png")
+print("Icon path:", get_resource_path("assets/textures/icon.png"))
+print("Song path:", get_resource_path("song_library/Space Massacre.csz/song.json"))
+
+icon_path = get_resource_path("assets/textures/icon.png")
 if os.path.exists(icon_path):
     print("Icon file found!")
 else:
     print(f"Icon file NOT found at: {icon_path}")
     print(f"Current script location: {os.path.dirname(os.path.abspath(__file__))}")
-    print(f"Files in assets/textures: {os.listdir(get_resource_path('../../assets/textures')) if os.path.exists(get_resource_path('../../assets/textures')) else 'Directory not found'}")
+    print(f"Files in assets/textures: {os.listdir(get_resource_path('assets/textures')) if os.path.exists(get_resource_path('assets/textures')) else 'Directory not found'}")
 
 # Use relative paths for better portability
 icon = py.image.load(get_resource_path("assets/textures/icon.png"))
@@ -1378,7 +1373,7 @@ def song_select():
         # Check if songs should be loaded by now (give it some time)
         if elapsed > 100:  # Small delay to allow rendering before loading
             # Do the actual loading
-            song_library = load_song_library(get_resource_path(os.path.join("song_library")))
+            song_library = load_song_library(get_resource_path("song_library"))
             song_buttons = create_song_buttons(
                 song_library,
                 DISPLAY_WIDTH // 2,
@@ -1571,7 +1566,7 @@ def main():
     
     # Load song library at startup
     try:
-        song_library = load_song_library(get_resource_path(os.path.join("song_library")))
+        song_library = load_song_library(get_resource_path("song_library"))
         print(f"Loaded {len(song_library)} songs")
     except Exception as e:
         print(f"Error loading song library: {e}")

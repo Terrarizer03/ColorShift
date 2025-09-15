@@ -1,4 +1,4 @@
-# WARNING: If you are viewing this code as an outsider and not a developer, this code is held up by sticks, glue, and my will to live (which is very little), and is very confusing.
+# WARNING: If you are viewing this code as an outsider and not a developer, this code is held up by sticks, glue, and my will to live which is very little, and is very confusing.
 # If you don't know what you're doing, don't touch anything. If you do, still don't touch anything. This game will, most probably, break. You have been warned.
 
 import pygame as py
@@ -7,14 +7,6 @@ import random, math, json, os, time, button, threading, sys
 # Initialize Pygame
 py.init()
 py.font.init()
-
-# Use relative paths for better portability
-icon = py.image.load(os.path.join("Rhythm Game", "assets", "textures", "icon.png"))
-hitsound = py.mixer.Sound(os.path.join("Rhythm Game", "assets", "sounds", "osu-hit-sound.mp3"))
-misssound = py.mixer.Sound(os.path.join("Rhythm Game", "assets", "sounds", "miss-sound.mp3"))
-click_sound = py.mixer.Sound(os.path.join("Rhythm Game", "assets", "sounds", "click-sound.wav"))
-click_sound.set_volume(0.2)
-py.display.set_icon(icon)  # Set the custom icon
 
 # Resolution settings
 DISPLAY_WIDTH, DISPLAY_HEIGHT = 1600, 900   # Display Size.
@@ -28,15 +20,34 @@ py.display.set_caption("ColorShift")
 clock = py.time.Clock()
 running = True
 
-def get_resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller"""
+def get_resource_path(relative_path: str) -> str:
     try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        # PyInstaller bundle
         base_path = sys._MEIPASS
     except Exception:
-        base_path = os.path.abspath(".")
-    
-    return os.path.join(base_path, relative_path)
+        # Go up from code/v2/ → code/ → ColorShift/
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    return os.path.normpath(os.path.join(base_path, relative_path))
+
+print("Icon path:", get_resource_path("assets/textures/icon.png"))
+print("Song path:", get_resource_path("song_library/Space Massacre.csz/song.json"))
+
+icon_path = get_resource_path("assets/textures/icon.png")
+if os.path.exists(icon_path):
+    print("Icon file found!")
+else:
+    print(f"Icon file NOT found at: {icon_path}")
+    print(f"Current script location: {os.path.dirname(os.path.abspath(__file__))}")
+    print(f"Files in assets/textures: {os.listdir(get_resource_path('assets/textures')) if os.path.exists(get_resource_path('assets/textures')) else 'Directory not found'}")
+
+# Use relative paths for better portability
+icon = py.image.load(get_resource_path("assets/textures/icon.png"))
+hitsound = py.mixer.Sound(get_resource_path("assets/sounds/osu-hit-sound.mp3"))
+misssound = py.mixer.Sound(get_resource_path("assets/sounds/miss-sound.mp3"))
+click_sound = py.mixer.Sound(get_resource_path("assets/sounds/click-sound.wav"))
+click_sound.set_volume(0.2)
+py.display.set_icon(icon)  # Set the custom icon
 
 # Dictionary to track currently held keys
 key_states = {
@@ -97,7 +108,7 @@ time_offset = 1000
 
 # FONTS
 # ======================
-comfortaa_font_path = os.path.join("Rhythm Game", "assets", "fonts", "Comfortaa-VariableFont_wght.ttf")
+comfortaa_font_path = get_resource_path("assets/fonts/Comfortaa-VariableFont_wght.ttf")
 comfortaa_font = py.font.Font(comfortaa_font_path, 46)
 sub_font = py.font.Font(comfortaa_font_path, 32)
 # ======================
@@ -212,12 +223,12 @@ class Note:
         self.hit_rating = " "
 
     def update_position(self):
-        #Updates the note's position based on speed and direction.
+        """Updates the note's position based on speed and direction."""
         if self.direction == "down":
             self.pos[1] += self.speed
 
     def move(self):
-        #Handles note movement and checks for a hit/miss.
+        """Handles note movement and checks for a hit/miss."""
         self.update_position()
 
         # Only check for hits when the note is in the hit area
@@ -239,7 +250,7 @@ class Note:
                 misssound.play()
 
     def check_hit(self):
-        #Checks if any key is pressed while note is in hit window.
+        """Checks if any key is pressed while note is in hit window."""
         global current_hit_rating, hit_rating_display_time
         
         if not self.active or self.hit:
@@ -274,9 +285,10 @@ class Note:
             hit_rating_display_time = py.time.get_ticks()
     
     def check_closeness(self):
-        # Evaluates the accuracy of the hit based on how close the note is to the ideal hit position. 
-        # Returns "perfect", "great", "max", or "meh" depending on closeness to the hit line.
-        
+        """
+        Evaluates the accuracy of the hit based on how close the note is to the ideal hit position.
+        Returns "perfect", "great", "max", or "meh" depending on closeness to the hit line.
+        """
         # The ideal hit position is at y=812 (middle of hit area 775-850)
         ideal_hit_position = 812
         
@@ -294,7 +306,7 @@ class Note:
             return "Meh"
 
     def fade_out(self):
-        #Handles fading effect ONLY when the note is hit; missed notes keep moving until off-screen.
+        """Handles fading effect ONLY when the note is hit; missed notes keep moving until off-screen."""
         if not self.hit:  # If note is NOT hit, allow it to keep moving until it disappears
             if self.pos[1] > DISPLAY_HEIGHT + 150:  # Once off-screen, deactivate it
                 self.missed = True  # Mark as missed once out of play area
@@ -316,7 +328,7 @@ class Note:
         self.alpha = max(255 - int((elapsed / (self.FADE_DURATION / 1000)) * 255), 0)
 
     def draw(self, screen):
-        #Draws the note with proper alpha fading.
+        """Draws the note with proper alpha fading."""
         if not self.active and not self.is_fading:
             return
 
@@ -339,7 +351,7 @@ class Song:
         self.json_path = json_path
         self.title = None
         self.artist = None
-        self.song = None
+        self.song_path = None
         self.notes = []
         self.fadeout_started = False
         self.fadeout_start_time = 0
@@ -365,7 +377,9 @@ class Song:
             
             self.title = data.get('song_name', 'Unknown Title')
             self.artist = data.get('song_artist', 'Unknown Artist')
-            self.song_path = data.get('song_path', 'No Song')
+            # Use get_resource_path for the song path
+            raw_song_path = data.get('song_path', 'No Song')
+            self.song_path = get_resource_path(raw_song_path) if raw_song_path != 'No Song' else None
             
             note_data = data.get('notes')
             self.note_info = note_data
@@ -378,16 +392,21 @@ class Song:
 
     def load_audio(self):
         """Load the audio file on demand"""
-        if not self.audio_loaded:
+        if not self.audio_loaded and self.song_path:
             try:
                 print(f"Loading audio for {self.title}...")
-                self.song = py.mixer.Sound(self.song_path)
+                # Check if file exists before trying to load
+                if not os.path.exists(self.song_path):
+                    raise FileNotFoundError(f"Audio file not found: {self.song_path}")
+                
+                # Use pygame.mixer.music for better memory management with large audio files
+                py.mixer.music.load(self.song_path)
                 self.audio_loaded = True
                 print(f"Audio loaded successfully for {self.title}")
             except Exception as e:
                 print(f"Error loading audio for {self.title}: {e}")
-                # Create an empty sound as fallback
-                self.song = py.mixer.Sound(buffer=b'\x00' * 44100)  # 1 second of silence
+                print(f"Attempted path: {self.song_path}")
+                self.audio_loaded = False
 
     def load_notes(self, note_data):
         if not note_data:
@@ -405,32 +424,63 @@ class Song:
         ]
         
     def play_song(self):
+        """Play the song"""
         # Make sure audio is loaded before playing
         if not self.audio_loaded:
             self.load_audio()
-        self.song.play()
+        
+        if self.audio_loaded:
+            try:
+                py.mixer.music.play()
+                print(f"Playing: {self.title}")
+            except Exception as e:
+                print(f"Error playing song: {e}")
+        else:
+            print(f"Could not play {self.title} - audio not loaded")
 
     def stop_song(self):
+        """Stop the song with fadeout"""
         if not self.audio_loaded:
             return
             
-        if not self.fadeout_started:
-            self.fadeout_started = True
-            self.fadeout_start_time = py.time.get_ticks()
+        try:
+            if not self.fadeout_started:
+                self.fadeout_started = True
+                self.fadeout_start_time = py.time.get_ticks()
+                py.mixer.music.fadeout(1000)  # Start 1-second fadeout
+            else:
+                # Check if fadeout is complete
+                elapsed = py.time.get_ticks() - self.fadeout_start_time
+                if elapsed >= 1000:  # 1000ms fade-out duration
+                    py.mixer.music.stop()
+                    self.fadeout_started = False
+        except Exception as e:
+            print(f"Error stopping song: {e}")
 
-        elapsed = py.time.get_ticks() - self.fadeout_start_time
-        if elapsed >= 1000:  # 1000ms fade-out duration
-            self.song.stop()
-            self.fadeout_started = False
-        else:
-            self.song.fadeout(1000)
+    def pause_song(self):
+        """Pause the song"""
+        if self.audio_loaded:
+            py.mixer.music.pause()
+
+    def unpause_song(self):
+        """Unpause the song"""
+        if self.audio_loaded:
+            py.mixer.music.unpause()
+
+    def is_playing(self):
+        """Check if the song is currently playing"""
+        return py.mixer.music.get_busy()
 
     def reset_notes(self):
+        """Reset notes and stop the song"""
         if self.audio_loaded:
-            self.song.stop()
+            py.mixer.music.stop()
+            self.fadeout_started = False
+        
         # Reset the song started flag
         if hasattr(self, '_song_started'):
             delattr(self, '_song_started')
+        
         self.notes.clear()
         self.notes = self.load_notes(self.note_info)
             
@@ -1323,7 +1373,7 @@ def song_select():
         # Check if songs should be loaded by now (give it some time)
         if elapsed > 100:  # Small delay to allow rendering before loading
             # Do the actual loading
-            song_library = load_song_library(os.path.join("Rhythm Game", "song_library"))
+            song_library = load_song_library(get_resource_path("song_library"))
             song_buttons = create_song_buttons(
                 song_library,
                 DISPLAY_WIDTH // 2,
@@ -1516,7 +1566,7 @@ def main():
     
     # Load song library at startup
     try:
-        song_library = load_song_library(os.path.join("Rhythm Game", "song_library"))
+        song_library = load_song_library(get_resource_path("song_library"))
         print(f"Loaded {len(song_library)} songs")
     except Exception as e:
         print(f"Error loading song library: {e}")
